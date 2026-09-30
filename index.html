@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Geteilt">
-<title>Geteilt-Zettelkasten V1</title>
+<title>Geteilt-Zettelkasten V2</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f4f1e8;color:#24303a;font-family:system-ui,-apple-system,sans-serif}
 .wrap{max-width:1000px;margin:auto;padding:25px 18px 40px}h1{text-align:center;margin:0 0 8px;font-size:34px}
@@ -33,7 +33,7 @@ button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.c
 .timer{text-align:center;font-size:22px;font-weight:750;min-height:30px}
 .timerbar{height:8px;background:#e1e4e6;border-radius:99px;overflow:hidden;max-width:470px;margin:5px auto 10px}
 .timerbar span{display:block;height:100%;width:100%;background:#24303a}
-.keypadWrap{max-width:470px;margin:auto;display:flex;align-items:center;gap:8px}.keypad{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.keypadWrap{max-width:470px;margin:-0.5cm auto 0;display:flex;align-items:center;gap:8px}.keypad{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .key{font-size:27px;padding:13px 8px;min-height:58px}
 .key.action{font-size:18px}.key.zero{grid-column:2}.key.ok{background:#24303a;color:#fff}.submitKey{font-size:42px;min-width:105px;min-height:105px;align-self:center}
 .pauseScreen{position:fixed;inset:0;z-index:1000;background:#f4f1e8;display:flex;align-items:center;justify-content:center;padding:24px}.pauseCard{text-align:center;background:white;border-radius:24px;padding:46px 38px;box-shadow:0 8px 25px #00000018;min-width:min(90vw,460px)}.pauseCard .pauseIcon{font-size:64px}.pauseCard h2{font-size:42px;margin:8px 0 12px}.pauseCard p{font-size:20px;color:#66717a;margin:0 0 24px}.pauseCard button{font-size:22px;padding:14px 28px}
@@ -44,6 +44,7 @@ button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.c
 .teacherTable th{font-size:13px;color:#66717a}
 .tActions button{padding:6px 8px;font-size:12px}
 @media(max-width:700px){.equation{gap:8px;justify-content:center}.equation .task{font-size:42px}.answerbox #answerDisplay{width:145px;height:68px;font-size:42px;line-height:58px}.keypadWrap{max-width:470px}.submitKey{min-width:105px;min-height:105px}.key{min-height:56px}.teacherTable th:nth-child(2),.teacherTable td:nth-child(2){display:none}}
+@media(max-width:500px){.equation .task{font-size:33px!important}.answerbox #answerDisplay{font-size:33px!important}}
 </style></head>
 <body>
 <div class="wrap">
