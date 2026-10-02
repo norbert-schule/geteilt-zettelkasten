@@ -45,6 +45,15 @@ button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.c
 .tActions button{padding:6px 8px;font-size:12px}
 @media(max-width:700px){.equation{gap:8px;justify-content:center}.equation .task{font-size:42px}.answerbox #answerDisplay{width:145px;height:68px;font-size:42px;line-height:58px}.keypadWrap{max-width:470px}.submitKey{min-width:105px;min-height:105px}.key{min-height:56px}.teacherTable th:nth-child(2),.teacherTable td:nth-child(2){display:none}}
 @media(max-width:500px){.equation .task{font-size:33px!important}.answerbox #answerDisplay{font-size:33px!important}}
+.practiceLayout{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:12px;align-items:center}
+.starColumn{display:flex;flex-direction:column-reverse;align-items:center;gap:2px;padding:12px 4px;border-radius:18px;background:#faf7ed;border:1px solid #ece4cc}
+.progressStar{display:block;font-size:29px;line-height:1.15;color:#d1d5d8}
+.progressStar.earned{color:#d99a13}
+.starMessage{text-align:center;color:#a5750d;font-weight:700;font-size:14px;min-height:20px;margin-top:6px}
+@media(max-width:700px){.game{padding:18px 12px}.practiceLayout{grid-template-columns:minmax(0,1fr) 35px;gap:5px}.progressStar{font-size:25px}.starColumn{padding:10px 2px}.equation{gap:5px}.answerbox #answerDisplay{width:100px}.submitKey{min-width:78px}}
+@media(max-width:500px){.equation .task{font-size:28px!important}.answerbox #answerDisplay{width:74px!important;font-size:28px}.submitKey{min-width:55px;min-height:80px;font-size:34px}.keypadWrap{gap:5px}.keypad{gap:5px}.key{font-size:24px}.progressStar{font-size:23px}}
+
+
 </style></head>
 <body>
 <div class="wrap">
@@ -62,7 +71,7 @@ button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.c
 <section id="game" class="game hidden">
 <div class="top"><div id="student" class="student"></div><div><button id="pauseBtn">⏸ Pause</button> <button id="back">← Zurück</button></div></div>
 <div id="selectedInfo" class="hint"></div>
-<div class="equation"><div id="task" class="task"></div><div class="answerbox"><div id="answerDisplay"></div></div></div>
+<div class="practiceLayout"><div class="practiceMain"><div class="equation"><div id="task" class="task"></div><div class="answerbox"><div id="answerDisplay"></div></div></div>
 <div id="timer" class="timer" aria-hidden="true"></div>
 <div class="timerbar"><span id="timerbar"></span></div>
 <div id="feedback" class="feedback"></div>
@@ -70,7 +79,7 @@ button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.c
 <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button>
 <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button>
 <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button>
-<button class="key action" data-key="clear">C</button><button class="key zero" data-key="0">0</button><button class="key action" data-key="back">⌫</button></div><button class="key ok submitKey" data-key="ok" aria-label="Antwort abschicken">✓</button></div>
+<button class="key action" data-key="clear">C</button><button class="key zero" data-key="0">0</button><button class="key action" data-key="back">⌫</button></div><button class="key ok submitKey" data-key="ok" aria-label="Antwort abschicken">✓</button></div></div><aside aria-label="Dein Fortschritt"><div id="starColumn" class="starColumn" role="img"></div><div id="starMessage" class="starMessage" role="status"></div></aside></div>
 </section></div>
 <div id="pauseScreen" class="pauseScreen hidden"><div class="pauseCard"><div class="pauseIcon">⏸️</div><h2>Pause</h2><p>Die Aufgabe wartet auf dich.</p><button id="resumeBtn" class="primary">▶ Weiter</button></div></div>
 
@@ -107,6 +116,20 @@ const PASSKEY="geteiltTeacherPassword";
 let currentName="",card=null,busy=false,timerId=null,answer="",lastCardKey="",paused=false,remainingMs=12000;
 const $=id=>document.getElementById(id);
 
+function updateStars(){
+ if(!currentName)return;
+ const s=getStudent(currentName);
+ if(!s.starProgress||typeof s.starProgress!=="object"||Array.isArray(s.starProgress))s.starProgress={};
+ const rows=s.rows||[],cards=s.cards.filter(c=>rows.includes(c.b));
+ const mode=[...new Set(rows)].sort((a,b)=>a-b).join(",");
+ const progress=cards.reduce((sum,c)=>sum+Math.min(5,Math.max(0,(Number(c.box)||1)-1)),0);
+ const earned=cards.length?Math.floor(10*progress/(cards.length*5)):0;
+ const count=Math.max(Math.min(10,Math.max(0,Number(s.starProgress[mode])||0)),earned);
+ s.starProgress[mode]=count;
+ const column=$("starColumn");column.replaceChildren();
+ for(let i=0;i<10;i++){const star=document.createElement("span");star.className="progressStar"+(i<count?" earned":"");star.textContent=i<count?"★":"☆";star.setAttribute("aria-hidden","true");column.append(star)}
+ column.setAttribute("aria-label",count+" von 10 Sternen erreicht");$("starMessage").textContent=count===10?"Super!":"";
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function makeCards(rows){
   let a=[];
@@ -136,7 +159,7 @@ function start(){
   if(!rows.length){alert("Bitte mindestens eine Reihe auswählen.");return}
   let s=getStudent(currentName),old=(s.cards||[]).filter(c=>Number(c.a)>=1&&Number(c.a)<=10&&Number(c.b)>=1&&Number(c.b)<=12),map=new Map(old.map(c=>[c.a+"·"+c.b,c]));
   rows.forEach(reihe=>{for(let zahl=1;zahl<=10;zahl++){let k=zahl+"·"+reihe;if(!map.has(k))map.set(k,{a:zahl,b:reihe,box:1,streak:0})}});
-  s.cards=[...map.values()];s.rows=rows;save();
+  s.cards=[...map.values()];s.rows=rows;updateStars();save();
   $("student").textContent="👤 "+currentName;$("selectedInfo").textContent="Geübt werden Geteiltaufgaben aus: "+rows.map(x=>x+". Reihe").join(", ");
   $("start").classList.add("hidden");$("game").classList.remove("hidden");$("add").textContent="Name hinzufügen";renderTeacher();pick()
 }
@@ -168,6 +191,7 @@ function timeout(){
 }
 function pick(){
  if(busy||!currentName)return;
+ updateStars();save();
  clearInterval(timerId); answer="";paused=false;remainingMs=12000;updatePauseButton();
  let s=getStudent(currentName),rows=s.rows||[],cs=s.cards.filter(c=>rows.includes(c.b));
  if(!cs.length)return;
@@ -198,7 +222,7 @@ function submit(){
  }else{
    card.box=1;card.streak=0;setAnswer(String(correct));$("feedback").innerHTML="";
  }
- save();renderTeacher();
+ updateStars();save();renderTeacher();
  setTimeout(()=>{busy=false;if(all6())showDiploma();else pick()},2000);
 }
 document.querySelectorAll(".key,.answerSubmit").forEach(b=>b.onclick=()=>{
